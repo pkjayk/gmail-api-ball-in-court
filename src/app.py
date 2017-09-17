@@ -1,19 +1,23 @@
 from flask import Flask
 import os
 import socket
+import gmail_api
 
 app = Flask(__name__)
 
+# Home page
 @app.route("/")
 def hello():
 
     return "Ball In Court"
 
-@app.route("/test")
+# Authentication page
+@app.route("/authenticate")
 def render():
 
-	return "coolio"
+	return gmail_api.main()
 
+# 404 - No page exists
 @app.errorhandler(404)
 def render(error):
 
