@@ -9,7 +9,7 @@ import googleapiclient.discovery
 
 # This variable specifies the name of a file that contains the OAuth 2.0
 # information for this application, including its client_id and client_secret.
-CLIENT_SECRETS_FILE = "/app/client_secret.json"
+CLIENT_SECRETS_FILE = "/root/.credentials/client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
@@ -38,22 +38,29 @@ def test_api_request():
   credentials = google.oauth2.credentials.Credentials(
       **flask.session['credentials'])
 
-  drive = googleapiclient.discovery.build(
-      API_SERVICE_NAME, API_VERSION, credentials=credentials)
-
-
-  files = drive.files().list().execute()
-
   gmail = googleapiclient.discovery.build(
       'gmail', 'v1', credentials=credentials)
 
-  threads = gmail.users().threads().list(userId='me', maxResults=2).execute().get('threads', [])
+  threads = gmail.users().threads().list(userId='me', maxResults=50).execute()
+
+  threads = threads.get('threads')
+
+  fromEmails = []
+
   for thread in threads:
       tdata = gmail.users().threads().get(userId='me', id=thread['id']).execute()
       nmsgs = len(tdata['messages'])
+      messages = tdata['messages']
 
-      if nmsgs > 2:    # skip if <3 msgs in thread
-          msg = tdata['messages'][0]['payload']
+      # get each individual message and grab it's headers
+      for message in messages:
+        headers = message['payload']['headers']
+
+        # with each message get headers and append it's "From" value
+        for header in headers:
+          if header["name"] == "From":
+            fromEmail = header["value"]
+            fromEmails.append(fromEmail)
 
 
 
@@ -62,7 +69,7 @@ def test_api_request():
   #              credentials in a persistent database instead.
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.jsonify(threads)
+  return flask.jsonify(fromEmails)
 
 
 @app.route('/authorize')
