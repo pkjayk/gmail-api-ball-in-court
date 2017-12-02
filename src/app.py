@@ -9,7 +9,7 @@ import googleapiclient.discovery
 
 # This variable specifies the name of a file that contains the OAuth 2.0
 # information for this application, including its client_id and client_secret.
-CLIENT_SECRETS_FILE = "/app/src/client_secret.json"
+CLIENT_SECRETS_FILE = "/app/client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
@@ -47,15 +47,13 @@ def test_api_request():
   gmail = googleapiclient.discovery.build(
       'gmail', 'v1', credentials=credentials)
 
-  results = gmail.users().labels().list(userId='me').execute()
-  labels = results.get('labels', [])
+  threads = gmail.users().threads().list(userId='me', maxResults=2).execute().get('threads', [])
+  for thread in threads:
+      tdata = gmail.users().threads().get(userId='me', id=thread['id']).execute()
+      nmsgs = len(tdata['messages'])
 
-  if not labels:
-    print('No labels found.')
-  else:
-    print('Labels:')
-    for label in labels:
-      print(label['name'])
+      if nmsgs > 2:    # skip if <3 msgs in thread
+          msg = tdata['messages'][0]['payload']
 
 
 
@@ -64,7 +62,7 @@ def test_api_request():
   #              credentials in a persistent database instead.
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.jsonify(**files)
+  return flask.jsonify(threads)
 
 
 @app.route('/authorize')
