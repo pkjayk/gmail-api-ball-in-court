@@ -13,9 +13,7 @@ CLIENT_SECRETS_FILE = "/root/.credentials/client_secret.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/gmail.readonly']
-API_SERVICE_NAME = 'drive'
-API_VERSION = 'v2'
+SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
 app = flask.Flask(__name__)
 # Note: A secret key is included in the sample so that it works.
@@ -28,8 +26,14 @@ app.secret_key = 'REPLACE ME - this value is here as a placeholder.'
 def index():
   return print_index_table()
 
-
-@app.route('/test')
+''' 
+    TODO: Put in separate class
+    1: Allow use to select a thread
+    2: Track thread
+    3: Use long-polling feature Google provides to track new thread message
+    4: Send push notification when thread has update or create a task? (Will need a DB)
+'''
+@app.route('/threads')
 def test_api_request():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
@@ -154,7 +158,7 @@ def credentials_to_dict(credentials):
 
 def print_index_table():
   return ('<table>' +
-          '<tr><td><a href="/test">Test an API request</a></td>' +
+          '<tr><td><a href="/threads">Test an API request</a></td>' +
           '<td>Submit an API request and see a formatted JSON response. ' +
           '    Go through the authorization flow if there are no stored ' +
           '    credentials for the user.</td></tr>' +
