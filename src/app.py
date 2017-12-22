@@ -28,7 +28,7 @@ def index():
 
 ''' 
     TODO: Put in separate class
-    1: Allow use to select a thread
+    1: Allow user to select a thread
     2: Track thread
     3: Use long-polling feature Google provides to track new thread message
     4: Send push notification when thread has update or create a task? (Will need a DB)
@@ -45,11 +45,11 @@ def test_api_request():
   gmail = googleapiclient.discovery.build(
       'gmail', 'v1', credentials=credentials)
 
-  threads = gmail.users().threads().list(userId='me', maxResults=50).execute()
+  threads = gmail.users().threads().list(userId='me', maxResults=3).execute()
 
   threads = threads.get('threads')
 
-  fromEmails = []
+  emails = []
 
   for thread in threads:
       tdata = gmail.users().threads().get(userId='me', id=thread['id']).execute()
@@ -62,9 +62,17 @@ def test_api_request():
 
         # with each message get headers and append it's "From" value
         for header in headers:
+
           if header["name"] == "From":
             fromEmail = header["value"]
-            fromEmails.append(fromEmail)
+          if header["name"] == "To":
+            toEmail = header["value"]
+
+        email = { "To Email": toEmail, "From Email": fromEmail }
+
+        emails.append(email)
+
+        print(message)
 
 
 
@@ -73,7 +81,7 @@ def test_api_request():
   #              credentials in a persistent database instead.
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.jsonify(fromEmails)
+  return flask.jsonify(emails)
 
 
 @app.route('/authorize')
