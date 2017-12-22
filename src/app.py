@@ -1,6 +1,7 @@
 import os
 import flask
 import requests
+from thread import Thread 
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -38,43 +39,11 @@ def test_api_request():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
 
-  # Load credentials from the session.
-  credentials = google.oauth2.credentials.Credentials(
-      **flask.session['credentials'])
+  credentials = google.oauth2.credentials.Credentials(**flask.session['credentials'])
+  
+  monitorThread = Thread()
 
-  gmail = googleapiclient.discovery.build(
-      'gmail', 'v1', credentials=credentials)
-
-  threads = gmail.users().threads().list(userId='me', maxResults=3).execute()
-
-  threads = threads.get('threads')
-
-  emails = []
-
-  for thread in threads:
-      tdata = gmail.users().threads().get(userId='me', id=thread['id']).execute()
-      nmsgs = len(tdata['messages'])
-      messages = tdata['messages']
-
-      # get each individual message and grab it's headers
-      for message in messages:
-        headers = message['payload']['headers']
-
-        # with each message get headers and append it's "From" value
-        for header in headers:
-
-          if header["name"] == "From":
-            fromEmail = header["value"]
-          if header["name"] == "To":
-            toEmail = header["value"]
-
-        email = { "To Email": toEmail, "From Email": fromEmail }
-
-        emails.append(email)
-
-        print(message)
-
-
+  emails = monitorThread.getThreads()
 
   # Save credentials back to session in case access token was refreshed.
   # ACTION ITEM: In a production app, you likely want to save these
