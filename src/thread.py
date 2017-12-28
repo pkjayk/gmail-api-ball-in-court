@@ -21,6 +21,8 @@ class Thread:
 		emails = []
 
 		for thread in threads:
+
+			threadID = thread['id']
 			tdata = self.client.users().threads().get(userId='me', id=thread['id']).execute()
 			nmsgs = len(tdata['messages'])
 			messages = tdata['messages']
@@ -29,15 +31,24 @@ class Thread:
 			for message in messages:
 				headers = message['payload']['headers']
 
+				print(headers)
 				# with each message get headers and append it's "From" value
 				for header in headers:
 					if header["name"] == "From":
 						fromEmail = header["value"]
 					if header["name"] == "To":
 						toEmail = header["value"]
+					if header["name"] == "Subject":
+						emailSubject = header["value"]
 
-				email = { "To Email": toEmail, "From Email": fromEmail }
+				email = { "emailSubject": emailSubject, "toEmail": toEmail, "fromEmail": fromEmail, "threadID": threadID }
 
 				emails.append(email)
 
 		return emails
+
+	def monitorThread(self, threadID):
+		# set the thread to remember in memory (for now)
+		flask.session['thread'] = threadID
+
+		return threadID

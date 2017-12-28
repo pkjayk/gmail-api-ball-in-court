@@ -2,6 +2,7 @@ import os
 import flask
 import requests
 from thread import Thread 
+from flask import render_template
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -50,7 +51,15 @@ def test_api_request():
   #              credentials in a persistent database instead.
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.jsonify(emails)
+  return render_template('threads.html', threads = emails)
+
+@app.route('/monitor/<threadID>')
+def monitor(threadID):
+  thread = Thread()
+
+  thread.monitorThread(threadID)
+  
+  return flask.session['thread']
 
 
 @app.route('/authorize')

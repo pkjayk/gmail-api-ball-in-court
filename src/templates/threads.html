@@ -1,0 +1,22 @@
+<!doctype html>
+<head>
+<title>Select a Thread</title>
+</head>
+
+<body>
+<div class="container">
+<h1>Select a Thread to Monitor</h1>
+<p>
+<table>
+{% for thread in threads %}
+    <tr>
+      <td>Subject: {{ thread['emailSubject'] }}</td>
+      <td>To: {{ thread['toEmail'] }}</td>
+      <td>From: {{ thread['fromEmail'] }}</td>
+      <td><a href="monitor/{{ thread['threadID'] }}">Monitor Thread</a></td>
+    </tr>
+{% endfor %}
+</table>
+</p>
+</body>
+</html>
