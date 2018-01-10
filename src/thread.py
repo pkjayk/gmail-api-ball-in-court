@@ -1,6 +1,7 @@
 import os
 import flask
 import requests
+import json
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -27,11 +28,12 @@ class Thread:
 			nmsgs = len(tdata['messages'])
 			messages = tdata['messages']
 
+			print(json.dumps(messages, indent=4, sort_keys=True))
+
 			# get each individual message and grab it's headers
 			for message in messages:
 				headers = message['payload']['headers']
 
-				print(headers)
 				# with each message get headers and append it's "From" value
 				for header in headers:
 					if header["name"] == "From":
