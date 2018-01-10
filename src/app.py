@@ -61,6 +61,10 @@ def monitor(threadID):
   
   return flask.session['thread']
 
+@app.route('/thread')
+def thread():
+  
+  return flask.session['thread']
 
 @app.route('/authorize')
 def authorize():
